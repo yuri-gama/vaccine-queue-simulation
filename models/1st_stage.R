@@ -1,18 +1,18 @@
 rm(list = ls())
 library(dplyr)
 library(RJSONIO) # reads json files
-set.seed(13)     # reproducibility
+# set.seed(13)     # reproducibility
 
 
 # reads process parameters
 distribution_parameters <- fromJSON("parameters.json")
 
-arrival_lambda <- distribution_parameters[["arrival"]][[1]][["lambda"]]
+arrival_lambda <- (distribution_parameters[["arrival"]][[1]][["lambda"]])
 
 registration_shape <- distribution_parameters[["registration"]][[1]][["shape"]]
 registration_mean <- distribution_parameters[["registration"]][[1]][["mean"]]
 registration_meanlog <- log(registration_mean)
-registration_sdlog <- log(registration_shape)
+registration_sdlog <- registration_shape
 
 
 # Função que simula um dia de funcionamento da clínica
@@ -53,10 +53,8 @@ atendimento_medico <- function(t.clinica, medico, t.inicio, t.chegada, t.saida, 
 
 
 simula.funcionamento <- function(t.abre = 8, 
-                                 t.fecha = 16, 
-                                 lambda.chegada = 1/2,
-                                 dur.min =15,
-                                 dur.max = 20){
+                                 t.fecha = 16
+                                 ){
   log <- data.frame()
   ans <- list()
   tol <- 30*60
@@ -67,19 +65,16 @@ simula.funcionamento <- function(t.abre = 8,
                                            # tempo máximo de admissao de pacientes
   
   # pacientes
-  lambda.chegada <- lambda.chegada / 60  # taxa de chegadas por segundo 
-  x <- t.entra * lambda.chegada * 5      # numero de pacientes que chegam ate a clinica
+  lambda.chegada <- arrival_lambda  # taxa de chegadas por segundo 
+  x <- t.entra * lambda.chegada *5      # numero de pacientes que chegam ate a clinica
                                          # (valor superestimado => fator 5)
   
   # gera tempos de chegada dos pacientes
   t.chegada <- cumsum(rexp(x, lambda.chegada))  
   
-  # consultas
-  dur.min <- dur.min * 60  # duracao minima da consulta (em segundos)
-  dur.max <- dur.max * 60  # duracao maxima da consulta (em segundos)
   
   # gera duracao de cada consulta dos pacientes que entraram na clinica
-  dur.consulta <- runif(x, min = dur.min, max = dur.max)
+  dur.consulta <- rlnorm(x,  meanlog = registration_meanlog, sdlog = registration_shape)
   
   # seleciona pacientes que serao admitidos na clinica
   # serão atendidos apenas aqueles que chegarem antes de `t.entra`:
@@ -99,27 +94,6 @@ simula.funcionamento <- function(t.abre = 8,
   medico    <- c() # medico que atendeu os pacientes
   tm1 <- tm2 <- tm3 <- 0  # instante em que M1 (médico 1) e M2 (médico 2) ficam livres
   
-  ## PRIMEIRA CONSULTA: 
-  # |-> medicos iniciam dia desocupados
-  # |-> medico 1 atende
-  # |-> paciente nao espera
-  # |-> tamanho da fila = 0
-  # t.inicio = tempo de chegada do 1o. paciente 
-  # t.saida  = t.inicio + duracao da consulta
-
-  # medico[1]     <- 1
-  # t.espera [1]  <- 0
-  # t.inicio [1]  <- t.chegada [1]
-  # t.saida [1]   <- t.inicio [1] + dur.consulta [1]
-  # t.clinica [1] <- t.saida [1]  - t.chegada [1]
-  # tm1 <- t.saida [1]
-
-  ## DEMAIS CONSULTAS (> 2o. paciente): 
-  # verifica se medico 1 esta livre
-  # |-> sim: medico 1 atende => paciente nao espera
-  # |-> não: verifica se medico 2 esta livre
-  #     |-> sim: medico 2 atende => paciente nao espera
-  #     |-> não: paciente espera
   ans <- list()
 
 
@@ -208,7 +182,9 @@ simula.funcionamento <- function(t.abre = 8,
   return(list(ans = ans, log = log))
 }
 
-Nrep <- 1000
+
+
+Nrep <- 100
 
 n.pac     <- c()
 n.espera  <- c()
