@@ -1,6 +1,19 @@
 rm(list = ls())
 library(dplyr)
-set.seed(13)  # para tornar a simulação reprodutível
+library(RJSONIO) # reads json files
+set.seed(13)     # reproducibility
+
+
+# reads process parameters
+distribution_parameters <- fromJSON("parameters.json")
+
+arrival_lambda <- distribution_parameters[["arrival"]][[1]][["lambda"]]
+
+registration_shape <- distribution_parameters[["registration"]][[1]][["shape"]]
+registration_mean <- distribution_parameters[["registration"]][[1]][["mean"]]
+registration_meanlog <- log(registration_mean)
+registration_sdlog <- log(registration_shape)
+
 
 # Função que simula um dia de funcionamento da clínica
 

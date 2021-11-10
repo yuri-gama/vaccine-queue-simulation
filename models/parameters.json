@@ -1,0 +1,26 @@
+{
+  "arrival": [
+    {
+      "type": "poisson",
+      "lambda": 0.0289
+    }
+  ],
+  "registration": [
+    {
+      "type": "lognormal",
+      "shape": 0.3205,
+      "scale": 4.421,
+      "median": 83,
+      "mean": 88
+    }
+  ],
+  "vaccination": [
+    {
+      "type": "lognormal",
+      "shape": 0.3989,
+      "scale": 5.104,
+      "median": 165,
+      "mean": 178
+    }
+  ]
+}
