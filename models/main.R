@@ -5,7 +5,7 @@ print("rodando main")
 
 set.seed(13)     # reproducibility
 
-Nrep <- 100
+Nrep <- 3
 
 n.pac     <- c()
 n.espera  <- c()
@@ -146,7 +146,6 @@ for (i in 2:Nrep){
   lines((lines2[[i]]$t), (lines2[[i]]$line_1), col = rgb(0, 0, 0, 0.1))
 }
 
-abline(v = 8*3600, lw = 2, col = 'red')
 abline(v = 8*3600 + 30*60, lw = 2, col = 'green')
 
 plot((lines2[[1]]$t), (lines2[[1]]$line_2), type = "s",
@@ -156,7 +155,6 @@ for (i in 2:Nrep){
   lines((lines2[[i]]$t), (lines2[[i]]$line_2), col = rgb(0, 0, 0, 0.1))
 }
 
-abline(v = 8*3600, lw = 2, col = 'red')
 abline(v = 8*3600 + 30*60, lw = 2, col = 'green')
 
 plot((lines2[[1]]$t), (lines2[[1]]$line_3), type = "s",
@@ -166,7 +164,6 @@ for (i in 2:Nrep){
   lines((lines2[[i]]$t), (lines2[[i]]$line_3), col = rgb(0, 0, 0, 0.1))
 }
 
-abline(v = 8*3600, lw = 2, col = 'red')
 abline(v = 8*3600 + 30*60, lw = 2, col = 'green')
 
 par(mfrow = c(2,2))

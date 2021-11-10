@@ -15,7 +15,7 @@ vaccination_meanlog <- log(vaccination_mean)
 
 resample <- function(x, ...) x[sample.int(length(x), ...)]
 
-atendimento_medico <- function(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, target, medico_num, t_inicio_consulta, t.entra, tol, atendido){
+atendimento_medico_segundo_estagio <- function(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, target, medico_num, t_inicio_consulta, t.entra, tol, atendido){
     medico[i]     <- medico_num
     t.inicio[i]  <- t_inicio_consulta                   # inicio da consulta
     t.saida[i]   <- t.inicio [i] + dur.consulta [i] # fim da consulta
@@ -23,10 +23,10 @@ atendimento_medico <- function(t.clinica, medico, t.inicio, t.chegada, t.saida, 
     t.clinica[i] <- t.saida [i]  - t.chegada [i]    # tempo que passou na clinica
     target <- t.saida [i]
 
-    if(t.inicio[i] <= t.entra + tol)
-    {
+    # if(t.inicio[i] <= t.entra + tol)
+    # {
       atendido[i] <- TRUE
-    }
+    # }
 
     log <- data.frame(
           i = i,
@@ -100,32 +100,32 @@ simula.funcionamento.segundo.estagio <- function(chegada,
     }
     if (t.chegada[i] >= tm1 && isavailable > 0 && choose == 1)
     {
-      ans <- atendimento_medico(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm1, 1, t.chegada[i], t.entra, tol, atendido)
+      ans <- atendimento_medico_segundo_estagio(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm1, 1, t.chegada[i], t.entra, tol, atendido)
       tm1 <- ans$target
     }
     else if ( t.chegada[i] >= tm2 && isavailable > 0 && choose == 2)
     {     
-      ans <- atendimento_medico(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm2, 2, t.chegada[i], t.entra, tol, atendido)
+      ans <- atendimento_medico_segundo_estagio(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm2, 2, t.chegada[i], t.entra, tol, atendido)
       tm2 <- ans$target
     }
     else if(t.chegada[i] >= tm3 && isavailable > 0 && choose == 3)
     {
-      ans <- atendimento_medico(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm3, 3, t.chegada[i], t.entra, tol, atendido)
+      ans <- atendimento_medico_segundo_estagio(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm3, 3, t.chegada[i], t.entra, tol, atendido)
       tm3 <- ans$target
     }
     else if (tm1 < tm2 && tm1 < tm3)
     {
-      ans <- atendimento_medico(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm1, 1, tm1, t.entra, tol, atendido)
+      ans <- atendimento_medico_segundo_estagio(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm1, 1, tm1, t.entra, tol, atendido)
       tm1 <- ans$target
     }
     else if(tm2 < tm1 && tm2 < tm3)
     {      
-      ans <- atendimento_medico(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm2, 2, tm2, t.entra, tol, atendido)
+      ans <- atendimento_medico_segundo_estagio(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm2, 2, tm2, t.entra, tol, atendido)
       tm2 <- ans$target
     }
     else 
     {
-      ans <- atendimento_medico(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm3, 3, tm3, t.entra, tol, atendido)
+      ans <- atendimento_medico_segundo_estagio(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm3, 3, tm3, t.entra, tol, atendido)
       tm3 <- ans$target
     }
 

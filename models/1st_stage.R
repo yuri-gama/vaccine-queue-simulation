@@ -53,7 +53,7 @@ simula.funcionamento <- function(t.abre = 8,
                                  ){
   log <- data.frame()
   ans <- list()
-  tol <- 30*60
+  tol <- 10*60
   
   ## DEFINICOES DE VARIAVEIS:
   # clinica
