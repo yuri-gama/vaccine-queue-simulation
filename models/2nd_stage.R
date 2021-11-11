@@ -45,7 +45,7 @@ atendimento_medico_segundo_estagio <- function(t.clinica, medico, t.inicio, t.ch
     return (ans)                    # fim da consulta de M2
 }
 
-simula.funcionamento.segundo.estagio <- function(chegada, 
+simula.funcionamento.segundo.estagio.2 <- function(chegada, 
                                  t.abre = 8, 
                                  t.fecha = 16
                                  ){
@@ -63,7 +63,135 @@ simula.funcionamento.segundo.estagio <- function(chegada,
   x <- t.entra * lambda.chegada *5      # numero de pacientes que chegam ate a clinica
                                          # (valor superestimado => fator 5)
   
-  t.chegada <- sort(chegada$t.saida)
+  chegada <- chegada %>% arrange(desc(t.saida))
+
+  t.chegada <- chegada$t.saida
+ 
+  # gera duracao de cada consulta dos pacientes que entraram na clinica
+  dur.consulta <- rlnorm(x,  meanlog = vaccination_meanlog, sdlog = vaccination_sdlog)
+  
+  # seleciona pacientes que serao admitidos na clinica
+  # serão atendidos apenas aqueles que chegarem antes de `t.entra`:
+  n.entra      <- length(t.chegada)            # no. de pacientes admitidos na clinica
+  dur.consulta <- dur.consulta [1:n.entra]     # duracao da consulta dos pacientes admitidos
+  
+ 
+  ## INICIALIZACAO:
+  ## ANTES DE INICIAR AS CONSULTAS:
+  t.inicio  <- c() # tempo de inicio da consulta
+  t.espera  <- c() # tempo de espera dos pacientes
+  t.saida   <- c() # tempo de saida dos pacientes
+  t.clinica <- c() # tempo que os pacientes passaram na clinica
+  atendido <- rep(FALSE, length(t.chegada))
+  medico    <- c() # medico que atendeu os pacientes
+  tm1 <- tm2 <- 0  # instante em que M1 (médico 1) e M2 (médico 2) ficam livres
+  
+  ans <- list()
+
+
+  doctor <- c(1:2)
+
+  for (i in 1:n.entra)
+  {
+
+    available <- c(t.chegada[i] >= tm1, t.chegada[i] >= tm2)
+    isavailable <- sum(available)
+    if(sum(available) > 0)
+    {
+      choose <- resample(doctor[available], 1)
+    }
+    if (t.chegada[i] >= tm1 && isavailable > 0 && choose == 1)
+    {
+      ans <- atendimento_medico_segundo_estagio(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm1, 1, t.chegada[i], t.entra, tol, atendido)
+      tm1 <- ans$target
+    }
+    else if ( t.chegada[i] >= tm2 && isavailable > 0 && choose == 2)
+    {     
+      ans <- atendimento_medico_segundo_estagio(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm2, 2, t.chegada[i], t.entra, tol, atendido)
+      tm2 <- ans$target
+    }
+    else if (tm1 < tm2)
+    {
+      ans <- atendimento_medico_segundo_estagio(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm1, 1, tm1, t.entra, tol, atendido)
+      tm1 <- ans$target
+    }
+    else
+    {      
+      ans <- atendimento_medico_segundo_estagio(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm2, 2, tm2, t.entra, tol, atendido)
+      tm2 <- ans$target
+    }
+
+        t.clinica = ans$clinica
+        t.inicio = ans$inicio
+        medico = ans$medico
+        t.chegada = ans$chegada
+        t.saida = ans$saida
+        t.espera = ans$espera
+        dur.consulta = ans$consulta
+        atendido = ans$atendido
+
+        log <- rbind(log, ans$log)
+
+  }
+
+ 
+  # print('writing csv')
+  # write.csv(log, '../log.csv', row.names = FALSE)
+  log <- log %>% filter(t_espera > 0)
+
+  get.in.line <- log %>% select(medico, t_chegada)
+  get.in.line <- get.in.line %>% mutate(line_1 = ifelse(medico == 1, +1, 0)) %>% 
+  mutate(line_2 = ifelse(medico == 2, +1, 0)) %>% select(-medico)
+  names(get.in.line) <- c("t", "line_1", "line_2")
+
+  get.out.line <- log %>% select(medico, t_inicio, atendido)
+  get.out.line <- get.out.line %>% filter(atendido == TRUE) %>% mutate(line_1 = ifelse(medico == 1, -1, 0)) %>% 
+  mutate(line_2 = ifelse(medico == 2, -1, 0)) %>% select(-medico, -atendido)
+  names(get.out.line) <- c("t", "line_1", "line_2")
+
+  log <- rbind(get.in.line, get.out.line) %>% arrange(t) %>%
+        mutate(line_1 = cumsum(line_1)) %>%
+        mutate(line_2 = cumsum(line_2)) 
+
+  ans <- data.frame(t.chegada = t.chegada,
+                    t.saida   = t.saida,
+                    t.espera  = t.espera,
+                    t.clinica = t.clinica,
+                    medico = medico, 
+                    atendido = atendido,
+                    t.total = t.saida - chegada$t.chegada)
+
+  # print(paste("antes", nrow(ans)))
+  # filtro <- ans %>% filter(t.chegada < t.entra)
+  # print(filtro$t.chegada)
+  # print(paste("chegaram depois da tolerancia", nrow(ans)-nrow(filtro)))
+  ans <- ans %>% filter(atendido == TRUE)
+  # print(paste("depois", nrow(ans)))
+
+  return(list(ans = ans, log = log))
+}
+
+simula.funcionamento.segundo.estagio.3 <- function(chegada, 
+                                 t.abre = 8, 
+                                 t.fecha = 16
+                                 ){
+  log <- data.frame()
+  ans <- list()
+  tol <- 30*60
+  
+  ## DEFINICOES DE VARIAVEIS:
+  # clinica
+  t.entra  <- ( t.fecha - t.abre ) * 3600  # duração do expediente na clínica (em segundos)
+                                           # tempo máximo de admissao de pacientes
+  
+  # pacientes
+  lambda.chegada <- arrival_lambda  # taxa de chegadas por segundo 
+  x <- t.entra * lambda.chegada *5      # numero de pacientes que chegam ate a clinica
+                                         # (valor superestimado => fator 5)
+  
+  chegada <- chegada %>% arrange(desc(t.saida))
+
+  t.chegada <- chegada$t.saida
  
   # gera duracao de cada consulta dos pacientes que entraram na clinica
   dur.consulta <- rlnorm(x,  meanlog = vaccination_meanlog, sdlog = vaccination_sdlog)
@@ -167,7 +295,156 @@ simula.funcionamento.segundo.estagio <- function(chegada,
                     t.espera  = t.espera,
                     t.clinica = t.clinica,
                     medico = medico, 
-                    atendido = atendido)
+                    atendido = atendido,
+                    t.total = t.saida - chegada$t.chegada)
+
+  # print(paste("antes", nrow(ans)))
+  # filtro <- ans %>% filter(t.chegada < t.entra)
+  # print(filtro$t.chegada)
+  # print(paste("chegaram depois da tolerancia", nrow(ans)-nrow(filtro)))
+  ans <- ans %>% filter(atendido == TRUE)
+  # print(paste("depois", nrow(ans)))
+
+  return(list(ans = ans, log = log))
+}
+
+simula.funcionamento.segundo.estagio.4 <- function(chegada, 
+                                 t.abre = 8, 
+                                 t.fecha = 16
+                                 ){
+  log <- data.frame()
+  ans <- list()
+  tol <- 30*60
+  
+  ## DEFINICOES DE VARIAVEIS:
+  # clinica
+  t.entra  <- ( t.fecha - t.abre ) * 3600  # duração do expediente na clínica (em segundos)
+                                           # tempo máximo de admissao de pacientes
+  
+  # pacientes
+  lambda.chegada <- arrival_lambda  # taxa de chegadas por segundo 
+  x <- t.entra * lambda.chegada *5      # numero de pacientes que chegam ate a clinica
+                                         # (valor superestimado => fator 5)
+  
+  chegada <- chegada %>% arrange(desc(t.saida))
+
+  t.chegada <- chegada$t.saida
+ 
+  # gera duracao de cada consulta dos pacientes que entraram na clinica
+  dur.consulta <- rlnorm(x,  meanlog = vaccination_meanlog, sdlog = vaccination_sdlog)
+  
+  # seleciona pacientes que serao admitidos na clinica
+  # serão atendidos apenas aqueles que chegarem antes de `t.entra`:
+  n.entra      <- length(t.chegada)            # no. de pacientes admitidos na clinica
+  dur.consulta <- dur.consulta [1:n.entra]     # duracao da consulta dos pacientes admitidos
+  
+ 
+  ## INICIALIZACAO:
+  ## ANTES DE INICIAR AS CONSULTAS:
+  t.inicio  <- c() # tempo de inicio da consulta
+  t.espera  <- c() # tempo de espera dos pacientes
+  t.saida   <- c() # tempo de saida dos pacientes
+  t.clinica <- c() # tempo que os pacientes passaram na clinica
+  atendido <- rep(FALSE, length(t.chegada))
+  medico    <- c() # medico que atendeu os pacientes
+  tm1 <- tm2 <- tm3 <- tm4 <- 0  # instante em que M1 (médico 1) e M2 (médico 2) ficam livres
+  
+  ans <- list()
+
+
+  doctor <- c(1:4)
+
+  for (i in 1:n.entra)
+  {
+
+    available <- c(t.chegada[i] >= tm1, t.chegada[i] >= tm2, t.chegada[i] >= tm3, t.chegada[i] >= tm4)
+    isavailable <- sum(available)
+    if(sum(available) > 0)
+    {
+      choose <- resample(doctor[available], 1)
+    }
+    if (t.chegada[i] >= tm1 && isavailable > 0 && choose == 1)
+    {
+      ans <- atendimento_medico_segundo_estagio(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm1, 1, t.chegada[i], t.entra, tol, atendido)
+      tm1 <- ans$target
+    }
+    else if ( t.chegada[i] >= tm2 && isavailable > 0 && choose == 2)
+    {     
+      ans <- atendimento_medico_segundo_estagio(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm2, 2, t.chegada[i], t.entra, tol, atendido)
+      tm2 <- ans$target
+    }
+    else if(t.chegada[i] >= tm3 && isavailable > 0 && choose == 3)
+    {
+      ans <- atendimento_medico_segundo_estagio(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm3, 3, t.chegada[i], t.entra, tol, atendido)
+      tm3 <- ans$target
+    }
+    else if(t.chegada[i] >= tm4 && isavailable > 0 && choose == 4)
+    {
+      ans <- atendimento_medico_segundo_estagio(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm4, 4, t.chegada[i], t.entra, tol, atendido)
+      tm4 <- ans$target
+    }
+    else if (tm1 < tm2 && tm1 < tm3 && tm1 < tm4)
+    {
+      ans <- atendimento_medico_segundo_estagio(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm1, 1, tm1, t.entra, tol, atendido)
+      tm1 <- ans$target
+    }
+    else if(tm2 < tm1 && tm2 < tm3 && tm2 < tm4)
+    {      
+      ans <- atendimento_medico_segundo_estagio(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm2, 2, tm2, t.entra, tol, atendido)
+      tm2 <- ans$target
+    }
+    else if(tm3 < tm1 && tm3 < tm2 && tm3 < tm4)
+    {
+      ans <- atendimento_medico_segundo_estagio(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm3, 3, tm3, t.entra, tol, atendido)
+      tm3 <- ans$target
+    }
+    else
+    {
+      ans <- atendimento_medico_segundo_estagio(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, tm4, 4, tm4, t.entra, tol, atendido)
+      tm4 <- ans$target
+    }
+
+        t.clinica = ans$clinica
+        t.inicio = ans$inicio
+        medico = ans$medico
+        t.chegada = ans$chegada
+        t.saida = ans$saida
+        t.espera = ans$espera
+        dur.consulta = ans$consulta
+        atendido = ans$atendido
+
+        log <- rbind(log, ans$log)
+
+  }
+
+ 
+  # print('writing csv')
+  # write.csv(log, '../log.csv', row.names = FALSE)
+  log <- log %>% filter(t_espera > 0)
+
+  get.in.line <- log %>% select(medico, t_chegada)
+  get.in.line <- get.in.line %>% mutate(line_1 = ifelse(medico == 1, +1, 0)) %>% 
+  mutate(line_2 = ifelse(medico == 2, +1, 0)) %>% mutate(line_3 = ifelse(medico == 3, +1, 0)) %>% mutate(line_4 = ifelse(medico == 4, +1, 0)) %>% select(-medico)
+  names(get.in.line) <- c("t", "line_1", "line_2", "line_3", "line_4")
+
+  get.out.line <- log %>% select(medico, t_inicio, atendido)
+  get.out.line <- get.out.line %>% filter(atendido == TRUE) %>% mutate(line_1 = ifelse(medico == 1, -1, 0)) %>% 
+  mutate(line_2 = ifelse(medico == 2, -1, 0)) %>% mutate(line_3 = ifelse(medico == 3, -1, 0)) %>% mutate(line_4 = ifelse(medico == 4, -1, 0)) %>% select(-medico, -atendido)
+  names(get.out.line) <- c("t", "line_1", "line_2", "line_3", "line_4")
+
+  log <- rbind(get.in.line, get.out.line) %>% arrange(t) %>%
+        mutate(line_1 = cumsum(line_1)) %>%
+        mutate(line_2 = cumsum(line_2)) %>%
+        mutate(line_3 = cumsum(line_3)) %>%
+        mutate(line_4 = cumsum(line_4))
+
+  ans <- data.frame(t.chegada = t.chegada,
+                    t.saida   = t.saida,
+                    t.espera  = t.espera,
+                    t.clinica = t.clinica,
+                    medico = medico, 
+                    atendido = atendido,
+                    t.total = t.saida - chegada$t.chegada)
 
   # print(paste("antes", nrow(ans)))
   # filtro <- ans %>% filter(t.chegada < t.entra)
