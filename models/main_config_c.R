@@ -5,7 +5,7 @@ print("rodando main")
 
 set.seed(13)     # reproducibility
 
-Nrep <- 350
+Nrep <- 1750
 
 n.pac     <- c()
 n.espera  <- c()
@@ -26,6 +26,7 @@ lines2 <- list()
 
 t.total.servico <- c()
 
+t.fechou <- 16
 for( i in 1: Nrep) {
   res <- simula.funcionamento.config.c(tol = 30)
   log <- res$log
@@ -49,84 +50,84 @@ for( i in 1: Nrep) {
   t.total.servico <- c(t.total.servico, mean(res$t.saida - res$t.chegada))
 }
 
-pdf(file="../simulation_config_c.pdf")
+# pdf(file="../simulation_config_c.pdf")
 
-vector_times <- (c(0:((16-8)*2))*0.5 + 8)*3600
-text_vector_times <- hms::as_hms(vector_times)
-# Histogramas do primeiro estagio
-plot((lines[[1]]$t), (lines[[1]]$line_1), type = "s",
-  xlab = 't(s)', ylab = 'n', main = 'fila 1', col = rgb(0, 0, 0, 0.1), xaxt = "n")
+# vector_times <- (c(0:((16-8)*2))*0.5 + 8)*3600
+# text_vector_times <- hms::as_hms(vector_times)
+# # Histogramas do primeiro estagio
+# plot((lines[[1]]$t), (lines[[1]]$line_1), type = "s",
+#   xlab = 't(s)', ylab = 'n', main = 'fila 1', col = rgb(0, 0, 0, 0.1), xaxt = "n")
 
-axis(1,                                                   # Add dates to x-axis
-     at = (vector_times - 28800), labels = text_vector_times, cex.axis = 0.75)
+# axis(1,                                                   # Add dates to x-axis
+#      at = (vector_times - 28800), labels = text_vector_times, cex.axis = 0.75)
 
-for (i in 2:Nrep){
-  lines((lines[[i]]$t), (lines[[i]]$line_1), col = rgb(0, 0, 0, 0.1))
-}
+# for (i in 2:Nrep){
+#   lines((lines[[i]]$t), (lines[[i]]$line_1), col = rgb(0, 0, 0, 0.1))
+# }
 
-abline(v = 8*3600, lw = 2, col = 'red')
-abline(v = 8*3600 + 30*60, lw = 2, col = 'green')
+# abline(v = 8*3600, lw = 2, col = 'red')
+# abline(v = 8*3600 + 30*60, lw = 2, col = 'green')
 
-plot((lines[[1]]$t), (lines[[1]]$line_2), type = "s",
-  xlab = 't(s)', ylab = 'n', main = 'fila 2', col = rgb(0, 0, 0, 0.1), xaxt = 'n')
-axis(1,                                                   # Add dates to x-axis
-     at = (vector_times - 28800), labels = text_vector_times, cex.axis = 0.75)
-
-
-for (i in 2:Nrep){
-  lines((lines[[i]]$t), (lines[[i]]$line_2), col = rgb(0, 0, 0, 0.1))
-}
-
-abline(v = 8*3600, lw = 2, col = 'red')
-abline(v = 8*3600 + 30*60, lw = 2, col = 'green')
+# plot((lines[[1]]$t), (lines[[1]]$line_2), type = "s",
+#   xlab = 't(s)', ylab = 'n', main = 'fila 2', col = rgb(0, 0, 0, 0.1), xaxt = 'n')
+# axis(1,                                                   # Add dates to x-axis
+#      at = (vector_times - 28800), labels = text_vector_times, cex.axis = 0.75)
 
 
-par(mfrow = c(2,2))
-hist(n.pac, 
-     col = "gray", 
-     main = "No. de pacientes atendidos",
-     xlab ="")
+# for (i in 2:Nrep){
+#   lines((lines[[i]]$t), (lines[[i]]$line_2), col = rgb(0, 0, 0, 0.1))
+# }
 
-abline(v   = quantile(n.pac, c(0.025, 0.5, 0.975)), 
-       col = c(4, 2, 4), 
-       lty = c(2, 1, 2), 
-       lwd = 2)
+# abline(v = 8*3600, lw = 2, col = 'red')
+# abline(v = 8*3600 + 30*60, lw = 2, col = 'green')
+
+
+# par(mfrow = c(2,2))
+# hist(n.pac, 
+#      col = "gray", 
+#      main = "No. de pacientes atendidos",
+#      xlab ="")
+
+# abline(v   = quantile(n.pac, c(0.025, 0.5, 0.975)), 
+#        col = c(4, 2, 4), 
+#        lty = c(2, 1, 2), 
+#        lwd = 2)
        
-hist(n.espera, 
-     col = "gray", 
-     main = "No. de pacientes que esperaram",
-     xlab ="")
-abline(v   = quantile(n.espera, c(0.025, 0.5, 0.975)), 
-       col = c(4, 2, 4), 
-       lty = c(2, 1, 2), 
-       lwd = 2)
+# hist(n.espera, 
+#      col = "gray", 
+#      main = "No. de pacientes que esperaram",
+#      xlab ="")
+# abline(v   = quantile(n.espera, c(0.025, 0.5, 0.975)), 
+#        col = c(4, 2, 4), 
+#        lty = c(2, 1, 2), 
+#        lwd = 2)
 
-hist(tm.espera/60, 
-     col = "gray",
-     main = "Tempo médio de Espera (min)",
-     xlab ="")
-abline(v   = quantile(tm.espera/60, c(0.025, 0.5, 0.975)), 
-       col = c(4, 2, 4), 
-       lty = c(2, 1, 2), 
-       lwd = 2)
+# hist(tm.espera/60, 
+#      col = "gray",
+#      main = "Tempo médio de Espera (min)",
+#      xlab ="")
+# abline(v   = quantile(tm.espera/60, c(0.025, 0.5, 0.975)), 
+#        col = c(4, 2, 4), 
+#        lty = c(2, 1, 2), 
+#        lwd = 2)
 
 
-       hist(t.fim/3600, 
-     col = "gray",
-     main = "Tempo de Fechamento da Clinica (h)",
-     xlab ="")
-abline(v   = quantile(t.fim/3600, c(0.025, 0.5, 0.975)), 
-       col = c(4, 2, 4), 
-       lty = c(2, 1, 2), 
-       lwd = 2)
+#        hist(t.fim/3600, 
+#      col = "gray",
+#      main = "Tempo de Fechamento da Clinica (h)",
+#      xlab ="")
+# abline(v   = quantile(t.fim/3600, c(0.025, 0.5, 0.975)), 
+#        col = c(4, 2, 4), 
+#        lty = c(2, 1, 2), 
+#        lwd = 2)
 
-par(mfrow = c(1,1))
+# par(mfrow = c(1,1))
 
-hist(t.total.servico/60, 
-     col = "gray",
-     main = "Tempo médio de Serviço (min)",
-     xlab ="")
-abline(v   = quantile(t.total.servico/60, c(0.025, 0.5, 0.975)), 
-       col = c(4, 2, 4), 
-       lty = c(2, 1, 2), 
-       lwd = 2)
+# hist(t.total.servico/60, 
+#      col = "gray",
+#      main = "Tempo médio de Serviço (min)",
+#      xlab ="")
+# abline(v   = quantile(t.total.servico/60, c(0.025, 0.5, 0.975)), 
+#        col = c(4, 2, 4), 
+#        lty = c(2, 1, 2), 
+#        lwd = 2)
