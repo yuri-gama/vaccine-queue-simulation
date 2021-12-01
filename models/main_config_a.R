@@ -5,7 +5,7 @@ print("rodando main")
 
 set.seed(13)     # reproducibility
 
-Nrep <- 1000
+Nrep <- 1750
 n.pac     <- c()
 n.espera  <- c()
 tm.espera <- c()
