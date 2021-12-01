@@ -5,7 +5,7 @@ print("rodando main")
 
 set.seed(13)     # reproducibility
 
-Nrep <- 1000
+Nrep <- 1750
 
 n.pac     <- c()
 n.espera  <- c()
@@ -29,7 +29,7 @@ t.total.servico <- c()
 t.fechou <- 10
 
 for( i in 1: Nrep) {
-  res <- simula.funcionamento.primeiro.estagio.2(t.fecha = t.fechou, tol = 30)
+  res <- simula.funcionamento.primeiro.estagio.2(t.fecha = t.fechou, tol = 0)
   log <- res$log
   res <- res$ans
   # log <- log %>% mutate(t = hms::as_hms(t + 28800))
