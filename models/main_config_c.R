@@ -26,9 +26,9 @@ lines2 <- list()
 
 t.total.servico <- c()
 
-t.fechou <- 16
+t.fechou <- 16.5
 for( i in 1: Nrep) {
-  res <- simula.funcionamento.config.c(tol = 30)
+  res <- simula.funcionamento.config.c(t.fecha = t.fechou, tol = 30)
   log <- res$log
   res <- res$ans
   # log <- log %>% mutate(t = hms::as_hms(t + 28800))
