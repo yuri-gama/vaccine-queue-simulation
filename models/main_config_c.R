@@ -44,7 +44,7 @@ for( i in 1: Nrep) {
   n.pac        <- c(n.pac, nrow(res))                         # 1
   n.espera     <- c(n.espera, sum(res$t.espera > 0))          # 2
   tm.espera    <- c(tm.espera, mean(res$t.espera))            # 3
-  t.fim        <- c(t.fim, 9 * 3600 + res$t.saida[nrow(res)]) # 4
+  t.fim        <- c(t.fim, 8 * 3600 + res$t.saida[nrow(res)]) # 4
 
 
   t.total.servico <- c(t.total.servico, mean(res$t.saida - res$t.chegada))
