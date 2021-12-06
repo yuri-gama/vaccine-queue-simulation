@@ -17,8 +17,6 @@ vaccination_meanlog <- log(vaccination_mean)
 
 # Função que simula um dia de funcionamento da clínica
 
-print("running")
-
 resample <- function(x, ...) x[sample.int(length(x), ...)]
 
 atendimento_medico <- function(t.clinica, medico, t.inicio, t.chegada, t.saida, t.espera, dur.consulta, i, target, medico_num, t_inicio_consulta, t.entra, tol, atendido){
@@ -26,7 +24,7 @@ atendimento_medico <- function(t.clinica, medico, t.inicio, t.chegada, t.saida, 
     t.inicio[i]  <- t_inicio_consulta                   # inicio da consulta
     t.saida[i]   <- t.inicio [i] + dur.consulta [i] # fim da consulta
     t.espera[i]  <- t.inicio [i] - t.chegada [i]    # tempo de espera ate consulta
-    t.clinica[i] <- t.saida [i]  - t.chegada [i]    # tempo que passou na clinica
+    t.clinica[i] <- t.saida [i]  - t.chegada [i]    # tempo que passou no posto
     target <- t.saida [i]
 
     if(t.inicio[i] <= t.entra + tol)
@@ -48,7 +46,7 @@ atendimento_medico <- function(t.clinica, medico, t.inicio, t.chegada, t.saida, 
     chegada = t.chegada, saida = t.saida, espera = t.espera, consulta = dur.consulta, target = target, log = log, atendido = atendido)
 
 
-    return (ans)                    # fim da consulta de M2
+    return (ans)
 }
 
 
@@ -74,15 +72,15 @@ simula.funcionamento.primeiro.estagio.3 <- function(t.abre = 8,
   t.chegada <- cumsum(rexp(x, lambda.chegada))  
   
   
-  # gera duracao de cada consulta dos pacientes que entraram na clinica
+  # gera duracao de cada consulta dos pacientes que entraram no posto
   dur.consulta <- rlnorm(x,  meanlog = registration_meanlog, sdlog = registration_shape)
   
-  # seleciona pacientes que serao admitidos na clinica
+  # seleciona pacientes que serao admitidos no posto
   # serão atendidos apenas aqueles que chegarem antes de `t.entra`:
-  pac.entra    <- which( t.chegada < t.entra ) # pacientes admitidos na clinica
+  pac.entra    <- which( t.chegada < t.entra ) # pacientes admitidos no posto
   t.chegada    <- t.chegada[pac.entra]         # tempo de chegada dos pacientes admitidos
   dur.consulta <- dur.consulta [pac.entra]     # duracao da consulta dos pacientes admitidos
-  n.entra      <- length(pac.entra)            # no. de pacientes admitidos na clinica
+  n.entra      <- length(pac.entra)            # no. de pacientes admitidos no posto
   
  
   ## INICIALIZACAO:
@@ -90,7 +88,7 @@ simula.funcionamento.primeiro.estagio.3 <- function(t.abre = 8,
   t.inicio  <- c() # tempo de inicio da consulta
   t.espera  <- c() # tempo de espera dos pacientes
   t.saida   <- c() # tempo de saida dos pacientes
-  t.clinica <- c() # tempo que os pacientes passaram na clinica
+  t.clinica <- c() # tempo que os pacientes passaram no posto
   atendido <- rep(FALSE, length(t.chegada))
   medico    <- c() # medico que atendeu os pacientes
   tm1 <- tm2 <- tm3 <- 0  # instante em que M1 (médico 1) e M2 (médico 2) ficam livres
@@ -205,15 +203,15 @@ simula.funcionamento.primeiro.estagio.2 <- function(t.abre = 8,
   t.chegada <- cumsum(rexp(x, lambda.chegada))  
   
   
-  # gera duracao de cada consulta dos pacientes que entraram na clinica
+  # gera duracao de cada consulta dos pacientes que entraram no posto
   dur.consulta <- rlnorm(x,  meanlog = registration_meanlog, sdlog = registration_shape)
   
-  # seleciona pacientes que serao admitidos na clinica
+  # seleciona pacientes que serao admitidos no posto
   # serão atendidos apenas aqueles que chegarem antes de `t.entra`:
-  pac.entra    <- which( t.chegada < t.entra ) # pacientes admitidos na clinica
+  pac.entra    <- which( t.chegada < t.entra ) # pacientes admitidos no posto
   t.chegada    <- t.chegada[pac.entra]         # tempo de chegada dos pacientes admitidos
   dur.consulta <- dur.consulta [pac.entra]     # duracao da consulta dos pacientes admitidos
-  n.entra      <- length(pac.entra)            # no. de pacientes admitidos na clinica
+  n.entra      <- length(pac.entra)            # no. de pacientes admitidos no posto
   
  
   ## INICIALIZACAO:
@@ -221,7 +219,7 @@ simula.funcionamento.primeiro.estagio.2 <- function(t.abre = 8,
   t.inicio  <- c() # tempo de inicio da consulta
   t.espera  <- c() # tempo de espera dos pacientes
   t.saida   <- c() # tempo de saida dos pacientes
-  t.clinica <- c() # tempo que os pacientes passaram na clinica
+  t.clinica <- c() # tempo que os pacientes passaram no posto
   atendido <- rep(FALSE, length(t.chegada))
   medico    <- c() # medico que atendeu os pacientes
   tm1 <- tm2 <- 0  # instante em que M1 (médico 1) e M2 (médico 2) ficam livres
@@ -325,15 +323,15 @@ simula.funcionamento.primeiro.estagio.1 <- function(t.abre = 8,
   t.chegada <- cumsum(rexp(x, lambda.chegada))  
   
   
-  # gera duracao de cada consulta dos pacientes que entraram na clinica
+  # gera duracao de cada consulta dos pacientes que entraram no posto
   dur.consulta <- rlnorm(x,  meanlog = registration_meanlog, sdlog = registration_shape)
   
-  # seleciona pacientes que serao admitidos na clinica
+  # seleciona pacientes que serao admitidos no posto
   # serão atendidos apenas aqueles que chegarem antes de `t.entra`:
-  pac.entra    <- which( t.chegada < t.entra ) # pacientes admitidos na clinica
+  pac.entra    <- which( t.chegada < t.entra ) # pacientes admitidos no posto
   t.chegada    <- t.chegada[pac.entra]         # tempo de chegada dos pacientes admitidos
   dur.consulta <- dur.consulta [pac.entra]     # duracao da consulta dos pacientes admitidos
-  n.entra      <- length(pac.entra)            # no. de pacientes admitidos na clinica
+  n.entra      <- length(pac.entra)            # no. de pacientes admitidos no posto
   
  
   ## INICIALIZACAO:
@@ -341,7 +339,7 @@ simula.funcionamento.primeiro.estagio.1 <- function(t.abre = 8,
   t.inicio  <- c() # tempo de inicio da consulta
   t.espera  <- c() # tempo de espera dos pacientes
   t.saida   <- c() # tempo de saida dos pacientes
-  t.clinica <- c() # tempo que os pacientes passaram na clinica
+  t.clinica <- c() # tempo que os pacientes passaram no posto
   atendido <- rep(FALSE, length(t.chegada))
   medico    <- c() # medico que atendeu os pacientes
   tm1 <- 0  # instante em que M1 (médico 1) e M2 (médico 2) ficam livres
@@ -432,18 +430,18 @@ simula.funcionamento.config.c <- function(t.abre = 8,
   t.chegada <- cumsum(rexp(x, lambda.chegada))  
   
   
-  # gera duracao de cada consulta dos pacientes que entraram na clinica
+  # gera duracao de cada consulta dos pacientes que entraram no posto
   dur.consulta1 <- rlnorm(x,  meanlog = registration_meanlog, sdlog = registration_shape)
   
   dur.consulta2 <- rlnorm(x,  meanlog = vaccination_meanlog, sdlog = vaccination_sdlog)
 
   dur.consulta <- dur.consulta1 + dur.consulta2
-  # seleciona pacientes que serao admitidos na clinica
+  # seleciona pacientes que serao admitidos no posto
   # serão atendidos apenas aqueles que chegarem antes de `t.entra`:
-  pac.entra    <- which( t.chegada < t.entra ) # pacientes admitidos na clinica
+  pac.entra    <- which( t.chegada < t.entra ) # pacientes admitidos no posto
   t.chegada    <- t.chegada[pac.entra]         # tempo de chegada dos pacientes admitidos
   dur.consulta <- dur.consulta [pac.entra]     # duracao da consulta dos pacientes admitidos
-  n.entra      <- length(pac.entra)            # no. de pacientes admitidos na clinica
+  n.entra      <- length(pac.entra)            # no. de pacientes admitidos no posto
   
  
   ## INICIALIZACAO:
@@ -451,7 +449,7 @@ simula.funcionamento.config.c <- function(t.abre = 8,
   t.inicio  <- c() # tempo de inicio da consulta
   t.espera  <- c() # tempo de espera dos pacientes
   t.saida   <- c() # tempo de saida dos pacientes
-  t.clinica <- c() # tempo que os pacientes passaram na clinica
+  t.clinica <- c() # tempo que os pacientes passaram no posto
   atendido <- rep(FALSE, length(t.chegada))
   medico    <- c() # medico que atendeu os pacientes
   tm1 <- tm2 <- 0  # instante em que M1 (médico 1) e M2 (médico 2) ficam livres

@@ -20,13 +20,10 @@ atendimento_medico_segundo_estagio <- function(t.clinica, medico, t.inicio, t.ch
     t.inicio[i]  <- t_inicio_consulta                   # inicio da consulta
     t.saida[i]   <- t.inicio [i] + dur.consulta [i] # fim da consulta
     t.espera[i]  <- t.inicio [i] - t.chegada [i]    # tempo de espera ate consulta
-    t.clinica[i] <- t.saida [i]  - t.chegada [i]    # tempo que passou na clinica
+    t.clinica[i] <- t.saida [i]  - t.chegada [i]    # tempo que passou no posto
     target <- t.saida [i]
 
-    # if(t.inicio[i] <= t.entra + tol)
-    # {
-      atendido[i] <- TRUE
-    # }
+    atendido[i] <- TRUE
 
     log <- data.frame(
           i = i,
@@ -67,12 +64,12 @@ simula.funcionamento.segundo.estagio.2 <- function(chegada,
 
   t.chegada <- chegada$t.saida
  
-  # gera duracao de cada consulta dos pacientes que entraram na clinica
+  # gera duracao de cada consulta dos pacientes que entraram no posto
   dur.consulta <- rlnorm(x,  meanlog = vaccination_meanlog, sdlog = vaccination_sdlog)
   
-  # seleciona pacientes que serao admitidos na clinica
+  # seleciona pacientes que serao admitidos no posto
   # serão atendidos apenas aqueles que chegarem antes de `t.entra`:
-  n.entra      <- length(t.chegada)            # no. de pacientes admitidos na clinica
+  n.entra      <- length(t.chegada)            # no. de pacientes admitidos no posto
   dur.consulta <- dur.consulta [1:n.entra]     # duracao da consulta dos pacientes admitidos
   
  
@@ -81,7 +78,7 @@ simula.funcionamento.segundo.estagio.2 <- function(chegada,
   t.inicio  <- c() # tempo de inicio da consulta
   t.espera  <- c() # tempo de espera dos pacientes
   t.saida   <- c() # tempo de saida dos pacientes
-  t.clinica <- c() # tempo que os pacientes passaram na clinica
+  t.clinica <- c() # tempo que os pacientes passaram no posto
   atendido <- rep(FALSE, length(t.chegada))
   medico    <- c() # medico que atendeu os pacientes
   tm1 <- tm2 <- 0  # instante em que M1 (médico 1) e M2 (médico 2) ficam livres
@@ -161,12 +158,7 @@ simula.funcionamento.segundo.estagio.2 <- function(chegada,
                     atendido = atendido,
                     t.total = t.saida - chegada$t.chegada)
 
-  # print(paste("antes", nrow(ans)))
-  # filtro <- ans %>% filter(t.chegada < t.entra)
-  # print(filtro$t.chegada)
-  # print(paste("chegaram depois da tolerancia", nrow(ans)-nrow(filtro)))
   ans <- ans %>% filter(atendido == TRUE)
-  # print(paste("depois", nrow(ans)))
 
   return(list(ans = ans, log = log))
 }
@@ -193,12 +185,12 @@ simula.funcionamento.segundo.estagio.3 <- function(chegada,
 
   t.chegada <- chegada$t.saida
  
-  # gera duracao de cada consulta dos pacientes que entraram na clinica
+  # gera duracao de cada consulta dos pacientes que entraram no posto
   dur.consulta <- rlnorm(x,  meanlog = vaccination_meanlog, sdlog = vaccination_sdlog)
   
-  # seleciona pacientes que serao admitidos na clinica
+  # seleciona pacientes que serao admitidos no posto
   # serão atendidos apenas aqueles que chegarem antes de `t.entra`:
-  n.entra      <- length(t.chegada)            # no. de pacientes admitidos na clinica
+  n.entra      <- length(t.chegada)            # no. de pacientes admitidos no posto
   dur.consulta <- dur.consulta [1:n.entra]     # duracao da consulta dos pacientes admitidos
   
  
@@ -207,7 +199,7 @@ simula.funcionamento.segundo.estagio.3 <- function(chegada,
   t.inicio  <- c() # tempo de inicio da consulta
   t.espera  <- c() # tempo de espera dos pacientes
   t.saida   <- c() # tempo de saida dos pacientes
-  t.clinica <- c() # tempo que os pacientes passaram na clinica
+  t.clinica <- c() # tempo que os pacientes passaram no posto
   atendido <- rep(FALSE, length(t.chegada))
   medico    <- c() # medico que atendeu os pacientes
   tm1 <- tm2 <- tm3 <- 0  # instante em que M1 (médico 1) e M2 (médico 2) ficam livres
@@ -298,12 +290,7 @@ simula.funcionamento.segundo.estagio.3 <- function(chegada,
                     atendido = atendido,
                     t.total = t.saida - chegada$t.chegada)
 
-  # print(paste("antes", nrow(ans)))
-  # filtro <- ans %>% filter(t.chegada < t.entra)
-  # print(filtro$t.chegada)
-  # print(paste("chegaram depois da tolerancia", nrow(ans)-nrow(filtro)))
   ans <- ans %>% filter(atendido == TRUE)
-  # print(paste("depois", nrow(ans)))
 
   return(list(ans = ans, log = log))
 }
@@ -330,12 +317,12 @@ simula.funcionamento.segundo.estagio.4 <- function(chegada,
 
   t.chegada <- chegada$t.saida
  
-  # gera duracao de cada consulta dos pacientes que entraram na clinica
+  # gera duracao de cada consulta dos pacientes que entraram no posto
   dur.consulta <- rlnorm(x,  meanlog = vaccination_meanlog, sdlog = vaccination_sdlog)
   
-  # seleciona pacientes que serao admitidos na clinica
+  # seleciona pacientes que serao admitidos no posto
   # serão atendidos apenas aqueles que chegarem antes de `t.entra`:
-  n.entra      <- length(t.chegada)            # no. de pacientes admitidos na clinica
+  n.entra      <- length(t.chegada)            # no. de pacientes admitidos no posto
   dur.consulta <- dur.consulta [1:n.entra]     # duracao da consulta dos pacientes admitidos
   
  
@@ -344,7 +331,7 @@ simula.funcionamento.segundo.estagio.4 <- function(chegada,
   t.inicio  <- c() # tempo de inicio da consulta
   t.espera  <- c() # tempo de espera dos pacientes
   t.saida   <- c() # tempo de saida dos pacientes
-  t.clinica <- c() # tempo que os pacientes passaram na clinica
+  t.clinica <- c() # tempo que os pacientes passaram no posto
   atendido <- rep(FALSE, length(t.chegada))
   medico    <- c() # medico que atendeu os pacientes
   tm1 <- tm2 <- tm3 <- tm4 <- 0  # instante em que M1 (médico 1) e M2 (médico 2) ficam livres
@@ -446,12 +433,7 @@ simula.funcionamento.segundo.estagio.4 <- function(chegada,
                     atendido = atendido,
                     t.total = t.saida - chegada$t.chegada)
 
-  # print(paste("antes", nrow(ans)))
-  # filtro <- ans %>% filter(t.chegada < t.entra)
-  # print(filtro$t.chegada)
-  # print(paste("chegaram depois da tolerancia", nrow(ans)-nrow(filtro)))
   ans <- ans %>% filter(atendido == TRUE)
-  # print(paste("depois", nrow(ans)))
 
   return(list(ans = ans, log = log))
 }
